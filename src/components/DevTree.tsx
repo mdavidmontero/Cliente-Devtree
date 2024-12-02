@@ -1,12 +1,54 @@
 import { Link, Outlet } from "react-router-dom";
 import NavigationTabs from "./NavigationTabs";
 import { Toaster } from "sonner";
-import { User } from "../types";
+import { SocialNetwork, User } from "../types";
+import { useEffect, useState } from "react";
+import DevTreeLink from "./DevTreeLink";
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface Props {
   data: User;
 }
 export default function DevTree({ data }: Props) {
+  const [enabledLinks, setEnabledLinks] = useState<SocialNetwork[]>(
+    JSON.parse(data.links).filter((item: SocialNetwork) => item.enabled)
+  );
+
+  useEffect(() => {
+    setEnabledLinks(
+      JSON.parse(data.links).filter((item: SocialNetwork) => item.enabled)
+    );
+  }, [data]);
+
+  const queryClient = useQueryClient();
+
+  const handleDragEnd = (e: DragEndEvent) => {
+    const { active, over } = e;
+    if (over && over.id) {
+      const prevIndex = enabledLinks.findIndex((link) => link.id === active.id);
+      const newIndex = enabledLinks.findIndex((link) => link.id === over?.id);
+      const order = arrayMove(enabledLinks, prevIndex, newIndex);
+      setEnabledLinks(order);
+      const disabledLinks: SocialNetwork[] = JSON.parse(data.links).filter(
+        (item: SocialNetwork) => !item.enabled
+      );
+      console.log(disabledLinks);
+      // const links = [...order, ...disabledLinks]
+      const links = order.concat(disabledLinks);
+      queryClient.setQueryData(["user"], (prevData: User) => {
+        return {
+          ...prevData,
+          links: JSON.stringify(links),
+        };
+      });
+    }
+  };
   return (
     <>
       <header className="py-5 bg-slate-800">
@@ -54,6 +96,22 @@ export default function DevTree({ data }: Props) {
               <p className="text-lg font-black text-center text-white">
                 {data.description}
               </p>
+
+              <DndContext
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
+              >
+                <div className="flex flex-col gap-5 mt-20'">
+                  <SortableContext
+                    items={enabledLinks}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    {enabledLinks.map((link) => (
+                      <DevTreeLink key={link.name} link={link} />
+                    ))}
+                  </SortableContext>
+                </div>
+              </DndContext>
             </div>
           </div>
         </main>
