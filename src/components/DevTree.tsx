@@ -42,7 +42,19 @@ export default function DevTree({ data }: Props) {
             <div className="flex-1 ">
               <Outlet />
             </div>
-            <div className="w-full px-5 py-10 space-y-6 md:w-96 bg-slate-800"></div>
+            <div className="w-full px-5 py-10 space-y-6 md:w-96 bg-slate-800">
+              <p className="text-4xl text-center text-white">{data.handle}</p>
+              {data.image && (
+                <img
+                  className="mx-auto max-w-[250px]"
+                  src={data.image}
+                  alt="Imagen perfil"
+                />
+              )}
+              <p className="text-lg font-black text-center text-white">
+                {data.description}
+              </p>
+            </div>
           </div>
         </main>
       </div>
