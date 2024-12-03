@@ -39,7 +39,6 @@ export default function ProfileView() {
       toast.error(error.message);
     },
     onSuccess: (data) => {
-      console.log(data);
       queryClient.setQueryData(["user"], (prevData: User) => {
         return {
           ...prevData,

@@ -11,6 +11,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { useQueryClient } from "@tanstack/react-query";
+import Header from "./Header";
 
 interface Props {
   data: User;
@@ -32,13 +33,12 @@ export default function DevTree({ data }: Props) {
     const { active, over } = e;
     if (over && over.id) {
       const prevIndex = enabledLinks.findIndex((link) => link.id === active.id);
-      const newIndex = enabledLinks.findIndex((link) => link.id === over?.id);
+      const newIndex = enabledLinks.findIndex((link) => link.id === over.id);
       const order = arrayMove(enabledLinks, prevIndex, newIndex);
       setEnabledLinks(order);
       const disabledLinks: SocialNetwork[] = JSON.parse(data.links).filter(
         (item: SocialNetwork) => !item.enabled
       );
-      console.log(disabledLinks);
       // const links = [...order, ...disabledLinks]
       const links = order.concat(disabledLinks);
       queryClient.setQueryData(["user"], (prevData: User) => {
@@ -51,28 +51,14 @@ export default function DevTree({ data }: Props) {
   };
   return (
     <>
-      <header className="py-5 bg-slate-800">
-        <div className="flex flex-col items-center max-w-5xl mx-auto md:flex-row md:justify-between">
-          <div className="w-full p-5 lg:p-0 md:w-1/3">
-            <img src="/logo.svg" className="block w-full" />
-          </div>
-          <div className="md:w-1/3 md:flex md:justify-end">
-            <button
-              className="p-2 text-xs font-black uppercase rounded-lg cursor-pointer bg-lime-500 text-slate-800"
-              onClick={() => {}}
-            >
-              Cerrar Sesión
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
       <div className="min-h-screen py-10 bg-gray-100">
         <main className="max-w-5xl p-10 mx-auto md:p-0">
           <NavigationTabs />
           <div className="flex justify-end">
             <Link
               className="text-2xl font-bold text-right text-slate-800"
-              to={""}
+              to={`/${data.handle}`}
               target="_blank"
               rel="noreferrer noopener"
             >
